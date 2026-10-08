@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vanguard-recon"
+version = "1.0.0"
+description = "Next-Gen Attack Surface Discovery & Automated CVE Intelligence Framework"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Cybersecurity Engineer", email = "engineer@cybersecurity.portfolio"}
+]
+keywords = [
+    "cybersecurity",
+    "penetration-testing",
+    "red-team",
+    "attack-surface-management",
+    "cve",
+    "cisa-kev",
+    "vulnerability-scanner",
+    "port-scanner",
+    "reconnaissance"
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "aiohttp>=3.9.0",
+    "dnspython>=2.6.0",
+    "rich>=13.7.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+    "pydantic>=2.6.0",
+    "jinja2>=3.1.3"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.5"
+]
+
+[project.scripts]
+vanguard = "vanguard.cli:main"

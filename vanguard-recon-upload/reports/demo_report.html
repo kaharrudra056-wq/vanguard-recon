@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanguard Security Audit Report - 127.0.0.1</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --crit: #ef4444;
+      --high: #f97316;
+      --med: #eab308;
+      --low: #3b82f6;
+      --pass: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text-main); line-height: 1.5; padding: 40px 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    /* Header */
+    .header { border-bottom: 2px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .title-group h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .title-group p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .badge-crit { background: rgba(239, 68, 68, 0.2); color: var(--crit); border: 1px solid var(--crit); }
+    .badge-high { background: rgba(249, 115, 22, 0.2); color: var(--high); border: 1px solid var(--high); }
+    .badge-med { background: rgba(234, 179, 8, 0.2); color: var(--med); border: 1px solid var(--med); }
+    .badge-low { background: rgba(59, 130, 246, 0.2); color: var(--low); border: 1px solid var(--low); }
+
+    /* Summary Metrics Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .stat-card .label { color: var(--text-muted); font-size: 13px; font-weight: 500; }
+    .stat-card .val { font-size: 32px; font-weight: 800; margin-top: 6px; }
+    
+    /* Sections */
+    .section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .section-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    tr:last-child td { border-bottom: none; }
+    
+    .cve-id { font-family: monospace; font-weight: 700; color: var(--accent); }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .pill-cisa { background: #dc2626; color: #fff; }
+    .pill-exp { background: #8b5cf6; color: #fff; }
+    
+    /* Code block */
+    .code-box { background: #000; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 13px; color: #10b981; overflow-x: auto; margin-top: 8px; }
+    
+    /* Print Styles */
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .section, .stat-card { background: #fff; border: 1px solid #ccc; color: #000; }
+      .title-group h1, .section-title { color: #000; }
+      th { color: #555; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-group">
+        <h1>Vanguard Security Assessment Report</h1>
+        <p>Target: <strong>127.0.0.1</strong> | Scanned at: 2026-10-08 16:50:51 UTC</p>
+      </div>
+      <div>
+        <span class="badge badge-critical">Risk Level: CRITICAL (100/100)</span>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Target IP Address</div>
+        <div class="val" style="font-size: 22px; font-family: monospace;">127.0.0.1</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Open Ports Discovered</div>
+        <div class="val">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Correlated CVEs</div>
+        <div class="val" style="color: var(--crit);">6</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">CISA KEV Wild Exploits</div>
+        <div class="val" style="color: var(--crit);">
+          ACTIVE
+        </div>
+      </div>
+    </div>
+
+    <!-- High Risk Vulnerability Findings -->
+    <div class="section">
+      <div class="section-title">
+        <span>Identified CVEs & Weaponized Exploits</span>
+        <span style="font-size: 13px; color: var(--text-muted);">6 total findings</span>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>CVE / Identifier</th>
+            <th>Severity</th>
+            <th>Service / Port</th>
+            <th>Weaponization</th>
+            <th>Description & Remediation</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2015-3306</span><br>
+              <small style="color: var(--text-muted);">ProFTPD v1.3.5</small>
+            </td>
+            <td>
+              <span class="badge badge-critical">CRITICAL 9.8</span>
+            </td>
+            <td>Port 2121 (ftp)</td>
+            <td>
+              <span class="pill pill-cisa">CISA KEV</span>
+              <span class="pill pill-exp">PoC Exploit</span>
+              
+            </td>
+            <td>
+              <strong>ProFTPD mod_copy Unauthenticated Remote File Copy / RCE</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">mod_copy in ProFTPD 1.3.5 allows remote attackers to read and write arbitrary files on the server via SITE CPFR and SITE CPTO commands without authentication.</p>
+              <div class="code-box">Fix: Upgrade ProFTPD to 1.3.5a or disable mod_copy in proftpd.conf.</div>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2023-38408</span><br>
+              <small style="color: var(--text-muted);">OpenSSH v8.5p1</small>
+            </td>
+            <td>
+              <span class="badge badge-critical">CRITICAL 9.8</span>
+            </td>
+            <td>Port 2222 (ssh)</td>
+            <td>
+              <span class="pill pill-cisa">CISA KEV</span>
+              <span class="pill pill-exp">PoC Exploit</span>
+              
+            </td>
+            <td>
+              <strong>OpenSSH PKCS#11 Provider Remote Code Execution</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Remote code execution in ssh-agent via PKCS#11 provider libraries when SSH agent forwarding is enabled.</p>
+              <div class="code-box">Fix: Upgrade OpenSSH to version 9.3p2 or newer. Disable SSH Agent forwarding when connecting to untrusted hosts.</div>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2024-6387</span><br>
+              <small style="color: var(--text-muted);">OpenSSH v8.5p1</small>
+            </td>
+            <td>
+              <span class="badge badge-high">HIGH 8.1</span>
+            </td>
+            <td>Port 2222 (ssh)</td>
+            <td>
+              <span class="pill pill-cisa">CISA KEV</span>
+              <span class="pill pill-exp">PoC Exploit</span>
+              
+            </td>
+            <td>
+              <strong>OpenSSH regreSSHion - Remote Unauthenticated Code Execution</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Signal handler race condition in OpenSSH server (sshd) allows unauthenticated remote code execution as root on glibc-based Linux systems.</p>
+              <div class="code-box">Fix: Upgrade OpenSSH to version 9.8p1 or newer immediately, or set 'LoginGraceTime 0' as temporary workaround.</div>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2021-41617</span><br>
+              <small style="color: var(--text-muted);">OpenSSH v8.5p1</small>
+            </td>
+            <td>
+              <span class="badge badge-high">HIGH 7.0</span>
+            </td>
+            <td>Port 2222 (ssh)</td>
+            <td>
+              
+              
+              <span style="color: var(--text-muted);">Theoretical</span>
+            </td>
+            <td>
+              <strong>OpenSSH Privilege Escalation via Supplementary Groups</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">OpenSSH failed to properly initialize supplementary groups when executing AuthorizedKeysCommand or AuthorizedPrincipalsCommand.</p>
+              <div class="code-box">Fix: Upgrade OpenSSH to version 8.8p1 or higher.</div>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2021-41773</span><br>
+              <small style="color: var(--text-muted);">Apache HTTP Server v2.4.49</small>
+            </td>
+            <td>
+              <span class="badge badge-critical">CRITICAL 9.8</span>
+            </td>
+            <td>Port 8088 (http)</td>
+            <td>
+              <span class="pill pill-cisa">CISA KEV</span>
+              <span class="pill pill-exp">PoC Exploit</span>
+              
+            </td>
+            <td>
+              <strong>Apache HTTP Server Path Traversal & Remote Code Execution</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Flaw in path normalization in Apache 2.4.49 allows unauthenticated remote attackers to map URLs to files outside the document root (Path Traversal) and execute CGI scripts.</p>
+              <div class="code-box">Fix: Immediately upgrade Apache HTTP Server to version 2.4.51 or higher.</div>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <span class="cve-id">CVE-2021-42013</span><br>
+              <small style="color: var(--text-muted);">Apache HTTP Server v2.4.49</small>
+            </td>
+            <td>
+              <span class="badge badge-critical">CRITICAL 9.8</span>
+            </td>
+            <td>Port 8088 (http)</td>
+            <td>
+              <span class="pill pill-cisa">CISA KEV</span>
+              <span class="pill pill-exp">PoC Exploit</span>
+              
+            </td>
+            <td>
+              <strong>Apache HTTP Server Path Traversal & RCE (Incomplete Fix for CVE-2021-41773)</strong>
+              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Incomplete fix for CVE-2021-41773 allows path traversal and remote code execution via double-encoded dot segments (%%32%65).</p>
+              <div class="code-box">Fix: Upgrade Apache HTTP Server to version 2.4.51 or newer.</div>
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+      
+    </div>
+
+    <!-- Attack Surface & Open Ports -->
+    <div class="section">
+      <div class="section-title">Open Ports & Service Fingerprints</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Port</th>
+            <th>Protocol</th>
+            <th>Detected Service</th>
+            <th>Banner & Version Details</th>
+            <th>Latency</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td><strong>2121</strong></td>
+            <td>TCP</td>
+            <td><span style="text-transform: uppercase; font-size: 12px; font-weight: 700;">unknown</span></td>
+            <td>
+              
+              <code style="font-size: 12px; color: var(--text-muted);">220 ProFTPD 1.3.5 Server (Ubuntu ProFTPD Default Installation)</code>
+              
+            </td>
+            <td>2.48 ms</td>
+          </tr>
+          
+          <tr>
+            <td><strong>2222</strong></td>
+            <td>TCP</td>
+            <td><span style="text-transform: uppercase; font-size: 12px; font-weight: 700;">ssh-alt</span></td>
+            <td>
+              
+              <code style="font-size: 12px; color: var(--text-muted);">SSH-2.0-OpenSSH_8.5p1 Ubuntu-3ubuntu0.1</code>
+              
+            </td>
+            <td>1.85 ms</td>
+          </tr>
+          
+          <tr>
+            <td><strong>8088</strong></td>
+            <td>TCP</td>
+            <td><span style="text-transform: uppercase; font-size: 12px; font-weight: 700;">unknown</span></td>
+            <td>
+              
+              <code style="font-size: 12px; color: var(--text-muted);">HTTP/1.1 200 OK
+Date: Thu, 08 Oct 2026 22:00:00 GMT
+Server: Apache/2.4.49 (Unix) OpenSSL/1.1.1d
+Content-Type: text/html
+Content-Length: 45
+
+<html><body><h1>Apache Test Site</h1></body></html></code>
+              
+            </td>
+            <td>1.31 ms</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Web Security Posture (if audited) -->
+    
+
+    <!-- Discovered Subdomains (if audited) -->
+    
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+{
+  "target": "127.0.0.1",
+  "target_ip": "127.0.0.1",
+  "timestamp": "2026-10-08 16:50:51 UTC",
+  "risk": {
+    "overall_score": 100,
+    "severity_label": "CRITICAL",
+    "critical_count": 4,
+    "high_count": 2,
+    "medium_count": 0,
+    "low_count": 0,
+    "cisa_kev_active": true,
+    "max_cvss": 9.8
+  },
+  "open_ports": [
+    {
+      "port": 2121,
+      "state": "open",
+      "service": "unknown",
+      "banner": "220 ProFTPD 1.3.5 Server (Ubuntu ProFTPD Default Installation)",
+      "latency_ms": 2.48
+    },
+    {
+      "port": 2222,
+      "state": "open",
+      "service": "ssh-alt",
+      "banner": "SSH-2.0-OpenSSH_8.5p1 Ubuntu-3ubuntu0.1",
+      "latency_ms": 1.85
+    },
+    {
+      "port": 8088,
+      "state": "open",
+      "service": "unknown",
+      "banner": "HTTP/1.1 200 OK\r\nDate: Thu, 08 Oct 2026 22:00:00 GMT\r\nServer: Apache/2.4.49 (Unix) OpenSSL/1.1.1d\r\nContent-Type: text/html\r\nContent-Length: 45\r\n\r\n<html><body><h1>Apache Test Site</h1></body></html>",
+      "latency_ms": 1.31
+    }
+  ],
+  "vulns": [
+    {
+      "cve_id": "CVE-2015-3306",
+      "title": "ProFTPD mod_copy Unauthenticated Remote File Copy / RCE",
+      "product": "ProFTPD",
+      "detected_version": "1.3.5",
+      "port": 2121,
+      "service": "ftp",
+      "cvss": 9.8,
+      "severity": "CRITICAL",
+      "cisa_kev": true,
+      "epss": 0.98,
+      "exploit_available": true,
+      "exploit_ref": "EDB-36742",
+      "description": "mod_copy in ProFTPD 1.3.5 allows remote attackers to read and write arbitrary files on the server via SITE CPFR and SITE CPTO commands without authentication.",
+      "remediation": "Upgrade ProFTPD to 1.3.5a or disable mod_copy in proftpd.conf."
+    },
+    {
+      "cve_id": "CVE-2023-38408",
+      "title": "OpenSSH PKCS#11 Provider Remote Code Execution",
+      "product": "OpenSSH",
+      "detected_version": "8.5p1",
+      "port": 2222,
+      "service": "ssh",
+      "cvss": 9.8,
+      "severity": "CRITICAL",
+      "cisa_kev": true,
+      "epss": 0.88,
+      "exploit_available": true,
+      "exploit_ref": "https://www.qualys.com/2023/07/19/cve-2023-38408/rce-openssh-forwarded-ssh-agent.txt",
+      "description": "Remote code execution in ssh-agent via PKCS#11 provider libraries when SSH agent forwarding is enabled.",
+      "remediation": "Upgrade OpenSSH to version 9.3p2 or newer. Disable SSH Agent forwarding when connecting to untrusted hosts."
+    },
+    {
+      "cve_id": "CVE-2024-6387",
+      "title": "OpenSSH regreSSHion - Remote Unauthenticated Code Execution",
+      "product": "OpenSSH",
+      "detected_version": "8.5p1",
+      "port": 2222,
+      "service": "ssh",
+      "cvss": 8.1,
+      "severity": "HIGH",
+      "cisa_kev": true,
+      "epss": 0.92,
+      "exploit_available": true,
+      "exploit_ref": "EDB-52059",
+      "description": "Signal handler race condition in OpenSSH server (sshd) allows unauthenticated remote code execution as root on glibc-based Linux systems.",
+      "remediation": "Upgrade OpenSSH to version 9.8p1 or newer immediately, or set 'LoginGraceTime 0' as temporary workaround."
+    },
+    {
+      "cve_id": "CVE-2021-41617",
+      "title": "OpenSSH Privilege Escalation via Supplementary Groups",
+      "product": "OpenSSH",
+      "detected_version": "8.5p1",
+      "port": 2222,
+      "service": "ssh",
+      "cvss": 7.0,
+      "severity": "HIGH",
+      "cisa_kev": false,
+      "epss": 0.05,
+      "exploit_available": false,
+      "exploit_ref": "",
+      "description": "OpenSSH failed to properly initialize supplementary groups when executing AuthorizedKeysCommand or AuthorizedPrincipalsCommand.",
+      "remediation": "Upgrade OpenSSH to version 8.8p1 or higher."
+    },
+    {
+      "cve_id": "CVE-2021-41773",
+      "title": "Apache HTTP Server Path Traversal & Remote Code Execution",
+      "product": "Apache HTTP Server",
+      "detected_version": "2.4.49",
+      "port": 8088,
+      "service": "http",
+      "cvss": 9.8,
+      "severity": "CRITICAL",
+      "cisa_kev": true,
+      "epss": 0.97,
+      "exploit_available": true,
+      "exploit_ref": "EDB-50383",
+      "description": "Flaw in path normalization in Apache 2.4.49 allows unauthenticated remote attackers to map URLs to files outside the document root (Path Traversal) and execute CGI scripts.",
+      "remediation": "Immediately upgrade Apache HTTP Server to version 2.4.51 or higher."
+    },
+    {
+      "cve_id": "CVE-2021-42013",
+      "title": "Apache HTTP Server Path Traversal & RCE (Incomplete Fix for CVE-2021-41773)",
+      "product": "Apache HTTP Server",
+      "detected_version": "2.4.49",
+      "port": 8088,
+      "service": "http",
+      "cvss": 9.8,
+      "severity": "CRITICAL",
+      "cisa_kev": true,
+      "epss": 0.96,
+      "exploit_available": true,
+      "exploit_ref": "EDB-50406",
+      "description": "Incomplete fix for CVE-2021-41773 allows path traversal and remote code execution via double-encoded dot segments (%%32%65).",
+      "remediation": "Upgrade Apache HTTP Server to version 2.4.51 or newer."
+    }
+  ],
+  "web_audit": null,
+  "subdomains": []
+}

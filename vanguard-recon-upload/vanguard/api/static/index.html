@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VanguardRecon - Attack Surface & CVE Intelligence Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --accent: #06b6d4;
+      --crit: #ef4444;
+      --high: #f97316;
+      --med: #eab308;
+      --low: #3b82f6;
+      --pass: #10b981;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 24px; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Top Navbar */
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff; }
+    .brand-text h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-text p { font-size: 12px; color: var(--muted); }
+
+    /* Glass Cards */
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+
+    /* Scan Control Form */
+    .form-grid { display: grid; grid-template-columns: 2fr 1fr auto; gap: 16px; align-items: end; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+    .form-control { width: 100%; background: #0e1526; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-control:focus { border-color: var(--accent); }
+    .btn { background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-crit { background: rgba(239, 68, 68, 0.2); color: var(--crit); border: 1px solid var(--crit); }
+    .badge-high { background: rgba(249, 115, 22, 0.2); color: var(--high); border: 1px solid var(--high); }
+    .badge-med { background: rgba(234, 179, 8, 0.2); color: var(--med); border: 1px solid var(--med); }
+    .badge-low { background: rgba(59, 130, 246, 0.2); color: var(--low); border: 1px solid var(--low); }
+    .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--pass); border: 1px solid var(--pass); }
+
+    /* Stats Grid */
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric-card { background: rgba(17, 24, 39, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .metric-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .metric-val { font-size: 28px; font-weight: 800; margin-top: 6px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab-btn { background: none; border: none; color: var(--muted); font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 12px; color: var(--muted); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    
+    .status-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Navbar -->
+    <header class="nav">
+      <div class="brand">
+        <div class="brand-icon">&#x1F6E1;</div>
+        <div class="brand-text">
+          <h1>VanguardRecon</h1>
+          <p>Attack Surface Discovery & Automated CVE Intelligence</p>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-pass">Engine Ready</span>
+      </div>
+    </header>
+
+    <!-- Scan Setup Form -->
+    <section class="card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Audit Target (Domain or IP Address)</label>
+          <input type="text" id="targetInput" class="form-control mono" placeholder="e.g. scanme.nmap.org or 127.0.0.1" value="127.0.0.1">
+        </div>
+        <div class="form-group">
+          <label>Target Ports (Profile or Custom)</label>
+          <input type="text" id="portsInput" class="form-control mono" value="21,22,25,80,443,1433,3306,5432,6379,8000,8080">
+        </div>
+        <div>
+          <button id="scanBtn" class="btn" onclick="startScan()">
+            <span id="btnIcon">&#x25B6;</span> Launch Audit
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Status / Results View -->
+    <div id="resultsArea" style="display: none;">
+      <!-- Stats Summary -->
+      <div class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">Target Host</div>
+          <div class="metric-val mono" id="mHost" style="font-size: 20px;">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Risk Posture Score</div>
+          <div class="metric-val" id="mRiskScore">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Open Ports</div>
+          <div class="metric-val" id="mOpenPorts">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Identified CVEs</div>
+          <div class="metric-val" id="mCVEs" style="color: var(--crit);">0</div>
+        </div>
+      </div>
+
+      <!-- Main Results Card -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+          <div class="tabs" style="margin-bottom: 0; flex-wrap: wrap;">
+            <button class="tab-btn active" onclick="switchTab('cveTab')">Vulnerabilities & CVEs</button>
+            <button class="tab-btn" onclick="switchTab('portsTab')">Open Ports & Banners</button>
+            <button class="tab-btn" onclick="switchTab('webTab')">Web Recon & Headers</button>
+            <button class="tab-btn" onclick="switchTab('sensitiveTab')">Sensitive Leaks & Files</button>
+            <button class="tab-btn" onclick="switchTab('mitreTab')">MITRE ATT&CK Matrix</button>
+            <button class="tab-btn" onclick="switchTab('diffTab')">Attack Surface Drift</button>
+          </div>
+          <div>
+            <a id="reportLink" href="#" target="_blank" class="btn btn-secondary" style="font-size: 13px; padding: 8px 14px;">
+              &#x1F4C4; View Full HTML Report
+            </a>
+          </div>
+        </div>
+
+        <!-- CVE Tab -->
+        <div id="cveTab" class="tab-pane">
+          <table>
+            <thead>
+              <tr>
+                <th>CVE ID</th>
+                <th>Severity</th>
+                <th>Affected Service</th>
+                <th>Weaponization</th>
+                <th>Remediation</th>
+              </tr>
+            </thead>
+            <tbody id="cveTableBody">
+              <tr><td colspan="5" style="text-align: center; color: var(--muted);">No vulnerabilities found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Ports Tab -->
+        <div id="portsTab" class="tab-pane" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Port</th>
+                <th>Service</th>
+                <th>Latency</th>
+                <th>Raw Banner</th>
+              </tr>
+            </thead>
+            <tbody id="portsTableBody">
+              <tr><td colspan="4" style="text-align: center; color: var(--muted);">No open ports found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Web Tab -->
+        <div id="webTab" class="tab-pane" style="display: none;">
+          <div id="webAuditContent" style="color: var(--muted);">No HTTP/HTTPS service identified on target.</div>
+        </div>
+
+        <!-- Sensitive Files Tab -->
+        <div id="sensitiveTab" class="tab-pane" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Leaked Path</th>
+                <th>Category</th>
+                <th>Severity</th>
+                <th>Evidence Snippet</th>
+                <th>Remediation</th>
+              </tr>
+            </thead>
+            <tbody id="sensitiveTableBody">
+              <tr><td colspan="5" style="text-align: center; color: var(--pass);">No sensitive information leaks identified.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MITRE ATT&CK Tab -->
+        <div id="mitreTab" class="tab-pane" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tactic</th>
+                <th>Technique ID</th>
+                <th>Technique Name</th>
+                <th>Audit Context</th>
+              </tr>
+            </thead>
+            <tbody id="mitreTableBody">
+              <tr><td colspan="4" style="text-align: center; color: var(--muted);">No MITRE ATT&CK techniques mapped.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Attack Surface Drift / Diff Tab -->
+        <div id="diffTab" class="tab-pane" style="display: none;">
+          <div style="margin-bottom: 16px;">
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Select two historical audits of this target to calculate Attack Surface Drift:</p>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <select id="diffScanA" class="form-control" style="max-width: 200px;"></select>
+              <span>vs</span>
+              <select id="diffScanB" class="form-control" style="max-width: 200px;"></select>
+              <button class="btn btn-secondary" onclick="runDiffComparison()">Compare Drift</button>
+            </div>
+          </div>
+          <div id="diffResultsBox" style="color: var(--muted); padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+            Run multiple scans to observe attack surface changes over time.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentScanId = null;
+    let pollInterval = null;
+
+    async function startScan() {
+      const target = document.getElementById('targetInput').value.trim();
+      const ports = document.getElementById('portsInput').value.trim();
+      if (!target) return alert('Please enter a target host.');
+
+      const btn = document.getElementById('scanBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="status-spinner"></span> Scanning...`;
+
+      document.getElementById('resultsArea').style.display = 'block';
+
+      try {
+        const resp = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target, ports, allow_internal: true, web_audit: true })
+        });
+        const data = await resp.json();
+        currentScanId = data.scan_id;
+        document.getElementById('reportLink').href = `/api/scans/${currentScanId}/report.html`;
+
+        pollInterval = setInterval(checkStatus, 1500);
+      } catch (err) {
+        alert('Scan initiation error: ' + err);
+        btn.disabled = false;
+        btn.innerHTML = `<span>&#x25B6;</span> Launch Audit`;
+      }
+    }
+
+    async function checkStatus() {
+      if (!currentScanId) return;
+      try {
+        const resp = await fetch(`/api/scans/${currentScanId}`);
+        const data = await resp.json();
+
+        if (data.status === 'completed' || data.status === 'failed') {
+          clearInterval(pollInterval);
+          const btn = document.getElementById('scanBtn');
+          btn.disabled = false;
+          btn.innerHTML = `<span>&#x25B6;</span> Launch Audit`;
+          renderResults(data);
+          updateScanHistoryDropdowns();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderResults(data) {
+      document.getElementById('mHost').innerText = data.target_ip || data.target;
+      const risk = data.risk || {};
+      document.getElementById('mRiskScore').innerHTML = `<span class="badge badge-${(risk.severity_label||'low').toLowerCase()}">${risk.severity_label||'LOW'} (${risk.overall_score||0}/100)</span>`;
+      document.getElementById('mOpenPorts').innerText = (data.open_ports || []).length;
+      document.getElementById('mCVEs').innerText = (data.vulns || []).length;
+
+      // Render CVEs
+      const cveBody = document.getElementById('cveTableBody');
+      if (data.vulns && data.vulns.length > 0) {
+        cveBody.innerHTML = data.vulns.map(v => `
+          <tr>
+            <td><strong class="mono" style="color: var(--accent);">${v.cve_id}</strong><br><small style="color: var(--muted);">${v.product}</small></td>
+            <td><span class="badge badge-${v.severity.toLowerCase()}">${v.severity} ${v.cvss}</span></td>
+            <td>Port ${v.port} (${v.service})</td>
+            <td>
+              ${v.cisa_kev ? '<span class="badge badge-crit">CISA KEV</span>' : ''}
+              ${v.exploit_available ? '<span class="badge badge-med">Public PoC</span>' : ''}
+            </td>
+            <td>
+              <strong>${v.title}</strong>
+              <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">${v.remediation}</p>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        cveBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--pass);">No known CVEs identified.</td></tr>`;
+      }
+
+      // Render Ports
+      const portsBody = document.getElementById('portsTableBody');
+      if (data.open_ports && data.open_ports.length > 0) {
+        portsBody.innerHTML = data.open_ports.map(p => `
+          <tr>
+            <td><strong class="mono">${p.port}</strong></td>
+            <td><span class="mono" style="text-transform: uppercase;">${p.service}</span></td>
+            <td>${p.latency_ms} ms</td>
+            <td><code class="mono" style="font-size: 12px; color: var(--muted);">${p.banner || '[No Banner]'}</code></td>
+          </tr>
+        `).join('');
+      } else {
+        portsBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--muted);">No open ports found.</td></tr>`;
+      }
+
+      // Render Web Audit
+      const webBox = document.getElementById('webAuditContent');
+      if (data.web_audit) {
+        const wa = data.web_audit;
+        webBox.innerHTML = `
+          <div style="margin-bottom: 14px;">
+            <p>Audited: <strong>${wa.url}</strong> | Title: <em>${wa.title || 'N/A'}</em> | Tech: <strong>${wa.detected_tech.join(', ') || 'N/A'}</strong></p>
+          </div>
+          <table>
+            <thead><tr><th>Header</th><th>Status</th><th>Guidance</th></tr></thead>
+            <tbody>
+              ${wa.security_headers.map(h => `
+                <tr>
+                  <td><code>${h.header}</code></td>
+                  <td><span class="badge badge-${h.status === 'PASS' ? 'pass' : 'crit'}">${h.status}</span></td>
+                  <td>${h.present ? '<code style="color: #10b981;">' + h.value + '</code>' : '<span style="color: var(--muted);">' + h.recommendation + '</span>'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        webBox.innerHTML = `<p style="color: var(--muted);">No web service detected.</p>`;
+      }
+
+      // Render Sensitive Files
+      const sensBody = document.getElementById('sensitiveTableBody');
+      if (data.sensitive_files && data.sensitive_files.length > 0) {
+        sensBody.innerHTML = data.sensitive_files.map(s => `
+          <tr>
+            <td><code class="mono" style="color: var(--crit); font-weight: 700;">${s.path}</code></td>
+            <td>${s.category}</td>
+            <td><span class="badge badge-${s.severity.toLowerCase()}">${s.severity}</span></td>
+            <td><code class="mono" style="font-size: 11px; color: var(--muted);">${s.evidence}</code></td>
+            <td>${s.remediation}</td>
+          </tr>
+        `).join('');
+      } else {
+        sensBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--pass);">No sensitive information disclosures discovered.</td></tr>`;
+      }
+
+      // Render MITRE ATT&CK
+      const mitreBody = document.getElementById('mitreTableBody');
+      if (data.mitre_techniques && data.mitre_techniques.length > 0) {
+        mitreBody.innerHTML = data.mitre_techniques.map(m => `
+          <tr>
+            <td><strong style="color: var(--accent);">${m.tactic}</strong></td>
+            <td><a href="${m.reference_url}" target="_blank" class="mono" style="color: #60a5fa; text-decoration: none;">${m.technique_id}</a></td>
+            <td><strong>${m.technique_name}</strong></td>
+            <td><span style="color: var(--muted); font-size: 13px;">${m.context}</span></td>
+          </tr>
+        `).join('');
+      } else {
+        mitreBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--muted);">No MITRE techniques mapped.</td></tr>`;
+      }
+    }
+
+    async function updateScanHistoryDropdowns() {
+      try {
+        const resp = await fetch('/api/scans');
+        const scans = await resp.json();
+        const selA = document.getElementById('diffScanA');
+        const selB = document.getElementById('diffScanB');
+        if (!selA || !selB) return;
+
+        selA.innerHTML = '';
+        selB.innerHTML = '';
+        scans.forEach((s, idx) => {
+          const optA = document.createElement('option');
+          optA.value = s.id;
+          optA.text = `${s.target} (#${s.id})`;
+          const optB = document.createElement('option');
+          optB.value = s.id;
+          optB.text = `${s.target} (#${s.id})`;
+          selA.appendChild(optA);
+          selB.appendChild(optB);
+        });
+        if (scans.length > 1) selB.selectedIndex = scans.length - 1;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function runDiffComparison() {
+      const a = document.getElementById('diffScanA').value;
+      const b = document.getElementById('diffScanB').value;
+      if (!a || !b) return alert('Select two scans to compare.');
+      if (a === b) return alert('Select two distinct scans.');
+
+      try {
+        const resp = await fetch(`/api/scans/compare?scan_a=${a}&scan_b=${b}`);
+        const delta = await resp.json();
+        const box = document.getElementById('diffResultsBox');
+        box.innerHTML = `
+          <div style="font-size: 14px;">
+            <p><strong>Drift Status:</strong> <span class="badge ${delta.drift_status.includes('IMPROVED') ? 'badge-pass' : (delta.drift_status.includes('DEGRADED') ? 'badge-crit' : 'badge-low')}">${delta.drift_status}</span></p>
+            <p style="margin-top: 6px;"><strong>Risk Score Delta:</strong> ${delta.risk_score_delta > 0 ? '+' : ''}${delta.risk_score_delta} points</p>
+            <p style="margin-top: 6px;"><strong>New Open Ports:</strong> ${delta.new_open_ports.length > 0 ? delta.new_open_ports.join(', ') : 'None'}</p>
+            <p style="margin-top: 6px;"><strong>Closed Ports:</strong> ${delta.closed_ports.length > 0 ? delta.closed_ports.join(', ') : 'None'}</p>
+            <p style="margin-top: 6px;"><strong>Newly Detected CVEs:</strong> ${delta.new_vulnerabilities.length > 0 ? delta.new_vulnerabilities.join(', ') : 'None'}</p>
+            <p style="margin-top: 6px;"><strong>Resolved CVEs:</strong> ${delta.resolved_vulnerabilities.length > 0 ? delta.resolved_vulnerabilities.join(', ') : 'None'}</p>
+          </div>
+        `;
+      } catch (err) {
+        alert('Diff error: ' + err);
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).style.display = 'block';
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
